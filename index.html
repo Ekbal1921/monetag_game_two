@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Telegram Monetag Mini App</title>
+  
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <!-- Monetag TMA SDK (Zone ID: 11513312) -->
+  <script src='//libtl.com/sdk.js' data-zone='11513312' data-sdk='show_11513312'></script>
+
+  <style>
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #0f172a);
+      --text-color: var(--tg-theme-text-color, #f8fafc);
+      --card-bg: var(--tg-theme-secondary-bg-color, #1e293b);
+      --hint-color: var(--tg-theme-hint-color, #94a3b8);
+      --accent-color: var(--tg-theme-button-color, #38bdf8);
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h2 {
+      margin: 0 0 6px 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--hint-color);
+      font-size: 14px;
+    }
+
+    .ad-card {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .ad-card h3 {
+      margin: 0 0 6px 0;
+      font-size: 16px;
+    }
+
+    .ad-card p {
+      margin: 0 0 14px 0;
+      font-size: 13px;
+      color: var(--hint-color);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .btn-reward {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .btn-interstitial {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .btn-popup {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+    }
+
+    #status-box {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--hint-color);
+      min-height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="header">
+      <h2>Reward Hub</h2>
+      <p>Watch ads to support the app and earn rewards</p>
+    </div>
+
+    <!-- Button 1: Rewarded Interstitial (Highest eCPM) -->
+    <div class="ad-card">
+      <h3>🏆 Rewarded Video</h3>
+      <p>Watch a complete ad to claim daily bonus points.</p>
+      <button class="btn btn-reward" onclick="triggerRewardedAd()">Watch Rewarded Ad</button>
+    </div>
+
+    <!-- Button 2: In-App Interstitial -->
+    <div class="ad-card">
+      <h3>⚡ Instant Interstitial</h3>
+      <p>Trigger high-eCPM full screen interstitial instantly.</p>
+      <button class="btn btn-interstitial" onclick="triggerInterstitialAd()">Show Interstitial</button>
+    </div>
+
+    <!-- Button 3: Rewarded Popup -->
+    <div class="ad-card">
+      <h3>🔥 Offer Popup</h3>
+      <p>Open targeted sponsored offers in a new tab.</p>
+      <button class="btn btn-popup" onclick="triggerPopupAd()">Open Popup Ad</button>
+    </div>
+
+    <div id="status-box">Status: Ready</div>
+  </div>
+
+  <script>
+    // Initialize Telegram WebApp SDK
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    // Get Telegram User ID dynamically for S2S Postbacks / Tracking
+    const userId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "guest_user";
+
+    function setStatus(msg) {
+      document.getElementById("status-box").textContent = "Status: " + msg;
+    }
+
+    // Preload ad media immediately upon opening app to maximize eCPM & eliminate delay
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof window.show_11513312 === 'function') {
+        window.show_11513312({ type: 'preload', ymid: userId, requestVar: 'app_launch' })
+          .then(() => setStatus("Ads preloaded & ready"))
+          .catch(() => setStatus("Ready"));
+      }
+    });
+
+    // 1. Trigger Rewarded Interstitial
+    function triggerRewardedAd() {
+      if (typeof window.show_11513312 !== 'function') {
+        setStatus("Monetag SDK loading... try again.");
+        return;
+      }
+
+      setStatus("Loading Rewarded Ad...");
+
+      window.show_11513312({
+        type: 'end',
+        ymid: userId,
+        requestVar: 'reward_button'
+      }).then((result) => {
+        if (result && result.reward_event_type === 'valued') {
+          setStatus("Ad finished! Reward awarded.");
+        } else {
+          setStatus("Ad completed.");
+        }
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+
+        // Automatically preload the next ad
+        window.show_11513312({ type: 'preload', ymid: userId, requestVar: 'reward_button' });
+      }).catch((err) => {
+        console.error("Ad Error:", err);
+        setStatus("Ad unavailable or skipped.");
+      });
+    }
+
+    // 2. Trigger In-App Interstitial
+    function triggerInterstitialAd() {
+      if (typeof window.show_11513312 !== 'function') {
+        setStatus("Monetag SDK loading... try again.");
+        return;
+      }
+
+      setStatus("Loading Interstitial...");
+
+      window.show_11513312({
+        type: 'inApp',
+        ymid: userId,
+        requestVar: 'interstitial_button'
+      }).then(() => {
+        setStatus("Interstitial completed.");
+      }).catch((err) => {
+        console.error("Ad Error:", err);
+        setStatus("Failed to display interstitial.");
+      });
+    }
+
+    // 3. Trigger Rewarded Popup
+    function triggerPopupAd() {
+      if (typeof window.show_11513312 !== 'function') {
+        setStatus("Monetag SDK loading... try again.");
+        return;
+      }
+
+      setStatus("Opening Popup...");
+
+      window.show_11513312({
+        type: 'pop',
+        ymid: userId,
+        requestVar: 'popup_button'
+      }).then(() => {
+        setStatus("Popup offer opened.");
+      }).catch((err) => {
+        console.error("Popup Error:", err);
+        setStatus("Popup blocked or failed to load.");
+      });
+    }
+  </script>
+</body>
+</html>
