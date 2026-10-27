@@ -8,8 +8,8 @@
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
-  <!-- Monetag TMA SDK (Zone ID: 11513312) -->
-  <script src='//libtl.com/sdk.js' data-zone='11513312' data-sdk='show_11513312'></script>
+  <!-- Monetag TMA SDK (Zone ID: 12131940) -->
+<script src='//libtl.com/sdk.js' data-zone='12131940' data-sdk='show_12131940'></script>
 
   <style>
     :root {
@@ -162,8 +162,8 @@
 
     // Preload ad media immediately upon opening app to maximize eCPM & eliminate delay
     window.addEventListener('DOMContentLoaded', () => {
-      if (typeof window.show_11513312 === 'function') {
-        window.show_11513312({ type: 'preload', ymid: userId, requestVar: 'app_launch' })
+      if (typeof window.show_12131940 === 'function') {
+        window.show_12131940({ type: 'preload', ymid: userId, requestVar: 'app_launch' })
           .then(() => setStatus("Ads preloaded & ready"))
           .catch(() => setStatus("Ready"));
       }
@@ -171,14 +171,14 @@
 
     // 1. Trigger Rewarded Interstitial
     function triggerRewardedAd() {
-      if (typeof window.show_11513312 !== 'function') {
+      if (typeof window.show_12131940 !== 'function') {
         setStatus("Monetag SDK loading... try again.");
         return;
       }
 
       setStatus("Loading Rewarded Ad...");
 
-      window.show_11513312({
+      window.show_12131940({
         type: 'end',
         ymid: userId,
         requestVar: 'reward_button'
@@ -191,7 +191,7 @@
         if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
 
         // Automatically preload the next ad
-        window.show_11513312({ type: 'preload', ymid: userId, requestVar: 'reward_button' });
+        window.show_12131940({ type: 'preload', ymid: userId, requestVar: 'reward_button' });
       }).catch((err) => {
         console.error("Ad Error:", err);
         setStatus("Ad unavailable or skipped.");
@@ -200,14 +200,14 @@
 
     // 2. Trigger In-App Interstitial
     function triggerInterstitialAd() {
-      if (typeof window.show_11513312 !== 'function') {
+      if (typeof window.show_12131940 !== 'function') {
         setStatus("Monetag SDK loading... try again.");
         return;
       }
 
       setStatus("Loading Interstitial...");
 
-      window.show_11513312({
+      window.show_12131940({
         type: 'inApp',
         ymid: userId,
         requestVar: 'interstitial_button'
@@ -221,14 +221,14 @@
 
     // 3. Trigger Rewarded Popup
     function triggerPopupAd() {
-      if (typeof window.show_11513312 !== 'function') {
+      if (typeof window.show_12131940 !== 'function') {
         setStatus("Monetag SDK loading... try again.");
         return;
       }
 
       setStatus("Opening Popup...");
 
-      window.show_11513312({
+      window.show_12131940({
         type: 'pop',
         ymid: userId,
         requestVar: 'popup_button'
